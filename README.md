@@ -1,0 +1,1 @@
+# impala-output-port-template
