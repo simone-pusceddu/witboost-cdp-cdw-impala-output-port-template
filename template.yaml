@@ -1,0 +1,379 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: cdp-refresh-aws-outputport-impala-template.1
+  title: Output Port CDP-Refresh Impala Template
+  description: Create a repository containing the definition of a CDP Impala Output Port
+  mesh:
+    icon: https://impala.apache.org/img/impala-logo.png
+  tags:
+    - aws
+    - cdp
+    - impala
+    - output-port
+spec:
+  owner: datameshplatform
+  type: outputport
+  parameters:
+    - title: Basic component information
+      required:
+        - name
+        - domain
+        - dataproduct
+        - description
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Required name used for display purposes
+          ui:field: EntityNamePicker
+          default: Impala CDP Output Port
+          ui:options:
+            allowArbitraryValues: true
+        fullyQualifiedName:
+          title: Fully Qualified Name
+          type: string
+          description: Output port fully qualified name
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this Output Port is for
+        domain:
+          title: Domain
+          type: string
+          description: Domain of the Data Product this Output Port belongs to
+          ui:field: EntityPicker
+          ui:options:
+            allowArbitraryValues: false
+            allowedKinds: 
+              - Domain
+        dataproduct:
+          title: Data Product
+          type: string
+          description: Data Product this Output Port belongs to
+          ui:field: EntityPicker
+          ui:filter:
+            - fieldName: domain
+              entityPath: spec.domain
+          ui:options:
+            allowArbitraryValues: false
+            allowedKinds: 
+              - System
+        identifier:
+          title: Identifier
+          type: string
+          description: A unique identifier for the entity inside the domain. It will not be editable after creation and is expected to be a string that is sequences of [a-zA-Z] separated by any of [-_]
+          ui:field: ComponentIdentifierPicker
+          ui:options:
+            allowArbitraryValues: false
+        developmentGroup:
+          title: Development Group
+          type: string
+          description: Data Product development group
+          ui:field: EntitySelectionPicker
+          ui:fieldName: dataproduct
+          ui:property: spec.owner
+          ui:options:
+            allowArbitraryValues: false
+        dependsOn:
+          title: Depends on
+          type: array
+          default: []
+          items:
+            type: string
+            ui:field: EntityComponentsPicker
+            ui:fieldName: dataproduct
+            ui:options:
+              allowArbitraryValues: false
+          description: An Output Port could depend on other Output Ports or storage areas
+
+    - title: Provide some additional information
+      required:
+        - description
+      properties:
+        processDescription:
+          title: Process Description
+          type: string
+          description: What is the underlying process that contributes to generate the data exposed by this Output Port
+        intervalOfChange: 
+          title: Interval of change
+          type: string
+          description: How often changes in the data are reflected
+        timeliness: 
+          title: Timeliness
+          type: string
+          description: The skew between the time that a business fact occurs and when it becomes visible in the data
+        upTime: 
+          title: Uptime
+          type: string
+          description: The percentage of port availability
+        termsAndConditions: 
+          title: Terms and conditions
+          type: string
+          description: If the data is usable only in specific environments
+        endpoint: 
+          title: Endpoint
+          type: string
+          description: This is the API endpoint that self-describes the Output Port and provides insightful information at runtime about the physical location of the data, the protocol that must be used, etc.
+
+    - title: Data contract schema
+      description: Primitive data types supported. For complex data types (MAP, STRUCT, etc.) please modify manually the component catalog-info.yaml once is generated.
+      properties:
+        schemaColumns:
+          title: Schema Columns
+          type: array
+          ui:ArrayFieldTemplate: ArrayTableTemplate
+          items:
+            type: object
+            ui:ObjectFieldTemplate: TableRowTemplate
+            required: [ name, dataType ]
+            properties:
+              name:
+                type: string
+                title: Column Name
+              description:
+                type: string
+                title: Description
+              dataType:
+                type: string
+                default: INT
+                title: Column Data Type
+                enum:
+                  - TINYINT
+                  - SMALLINT
+                  - INT
+                  - BIGINT
+                  - DOUBLE
+                  - DECIMAL
+                  - TIMESTAMP
+                  - DATE
+                  - STRING
+                  - CHAR
+                  - VARCHAR
+                  - BOOLEAN
+                  - ARRAY
+            allOf:
+              - if:
+                  properties:
+                    dataType:
+                      oneOf:
+                        - const: VARCHAR
+                        - const: CHAR
+                then:
+                  properties:
+                    dataLength:
+                      title: Column Length
+                      type: integer
+                      description: Maximum length of column row
+                  required:
+                    - dataLength
+              - if:
+                  properties:
+                    dataType:
+                      oneOf:
+                        - const: DECIMAL
+                then:
+                  properties:
+                    dataTypeDisplay:
+                      title: Data Type Display
+                      type: string
+                      description: Representation of data type (e.g. `decimal(9,0)` )
+              - if:
+                  properties:
+                    dataType:
+                      const: ARRAY
+                then:
+                  required:
+                    - arrayDataType
+                  properties:
+                    arrayDataType:
+                      title: Array Data Type
+                      description: Data type of the array elements
+                      type: string
+                      default: INT
+                      enum:
+                        - TINYINT
+                        - SMALLINT
+                        - INT
+                        - BIGINT
+                        - DOUBLE
+                        - DECIMAL
+                        - TIMESTAMP
+                        - DATE
+                        - STRING
+                        - CHAR
+                        - VARCHAR
+                        - BOOLEAN
+                        - ARRAY
+                  allOf:
+                    - if:
+                        properties:
+                          arrayDataType:
+                            oneOf:
+                              - const: VARCHAR
+                              - const: CHAR
+                      then:
+                        properties:
+                          dataLength:
+                            title: Column Length
+                            type: integer
+                            description: Maximum length of column row
+                        required:
+                          - dataLength
+                    - if:
+                        properties:
+                          arrayDataType:
+                            oneOf:
+                              - const: DECIMAL
+                      then:
+                        properties:
+                          dataTypeDisplay:
+                            title: Data Type Display
+                            type: string
+                            description: Representation of data type (e.g. `decimal(9,0)` )
+
+    - title: Data sharing agreements information
+      properties:
+        purpose:
+          title: Purpose
+          type: string
+          description: What is the goal of this dataset
+        billing: 
+          title: Billing
+          type: string
+          description: How a consumer will be charged back when it consumes this Output Port
+        security: 
+          title: Security
+          type: string
+          description: Additional information related to security aspects, like restrictions, maskings, sensible information and privacy
+        intendedUsage: 
+          title: Intended Usage
+          type: string
+          description: Any other information needed by the consumer in order to effectively consume the data, it could be related to technical stuff (e.g. extract no more than one year of data for good performances ) or to business domains (e.g. this data is only useful in the marketing domains)
+        limitations: 
+          title: Limitations
+          type: string
+          description: If any limitation is present it must be made super clear to the consumers
+        lifeCycle: 
+          title: Lifecycle
+          type: string
+          description: Describe how the data will be historicized and how and when it will be deleted
+        confidentiality: 
+          title: Confidentiality
+          type: string
+          description: Describe what a consumer should do to keep the information confidential, how to process and store it. Permission to share or report it
+            
+    - title: Provide Output port deployment information
+      required:
+        - databaseName
+        - tableName
+        - cdpEnvironment
+        - cdwVirtualWarehouse
+        - format
+        - location
+      properties:
+        databaseName:
+          title: Database name
+          type: string
+          description: >
+            Impala Database name must be equal to $Domain_$DPName_$DPMajorVrs and must contains only the characters [a-zA-Z0-9_].
+            All other characters (like spaces or dashes) must be replaced with underscores (_)
+        tableName:
+          title: Table name
+          type: string
+          description: >
+            Impala Table name must be equal to $Domain_$DPName_$DPMajorVrs_$ComponentName_$Environment and must contains only the characters [a-zA-Z0-9_].
+            All other characters (like spaces or dashes) must be replaced with underscores (_)
+        cdpEnvironment:
+          title: CDP Environment
+          type: string
+          description: Name of the CDP Environment
+        cdwVirtualWarehouse:
+          title: CDW virtual warehouse
+          type: string
+          description: Name of the CDW virtual warehouse
+        format:
+          title: Format
+          type: string
+          description: File format
+          enum:
+            - PARQUET
+            - CSV
+        location:
+          title: Table location
+          type: string
+          description: S3A path pointing to the table files location
+          validation:
+            errorMessage: s3a location must start with s3a://
+            regularExpression: ^s3a://
+          ui:field: RegexPicker
+
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: '.'
+        values:
+          name: '${{ parameters.name }}'
+          fullyQualifiedName: '${{ parameters.fullyQualifiedName }}'
+          description: '${{ parameters.description }}'
+          domain: '${{ parameters.domain }}'
+          dataproduct: '${{ parameters.dataproduct }}'
+          identifier: '${{ parameters.identifier }}'
+          developmentGroup: '${{ parameters.developmentGroup }}'
+          dependsOn: '${{ parameters.dependsOn }}'
+          processDescription: '${{ parameters.processDescription }}'
+          intervalOfChange: '${{ parameters.intervalOfChange }}'
+          timeliness: '${{ parameters.timeliness }}'
+          upTime: '${{ parameters.upTime }}'
+          termsAndConditions: '${{ parameters.termsAndConditions }}'
+          endpoint: '${{ parameters.endpoint }}'
+          schemaColumns: '${{ parameters.schemaColumns }}'
+          purpose: '${{ parameters.purpose }}'
+          billing: '${{ parameters.billing }}'
+          security: '${{ parameters.security }}'
+          intendedUsage: '${{ parameters.intendedUsage }}'
+          limitations: '${{ parameters.limitations }}'
+          lifeCycle: '${{ parameters.lifeCycle }}'
+          confidentiality: '${{ parameters.confidentiality }}'
+          databaseName: '${{ parameters.databaseName }}'
+          tableName: '${{ parameters.tableName }}'
+          cdpEnvironment: '${{ parameters.cdpEnvironment }}'
+          cdwVirtualWarehouse: '${{ parameters.cdwVirtualWarehouse }}'
+          format: '${{ parameters.format }}'
+          location: '${{ parameters.location }}'
+          creationDate: '${{ parameters.creationDate }}'
+          useCaseTemplateId: urn:dmb:utm:aws-cdp-outputport-impala-template:0.0.0
+          infrastructureTemplateId: urn:dmb:itm:aws-cdp-outputport-impala-provisioner:1
+          destination: &destination 'gitlab.com?owner=AgileDmbSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
+          rootDirectory: '.'
+          displayName: '${{ parameters.displayName }}'
+          artifact_id: '${{ parameters.name }}'
+          useCaseTemplateVersion: 0.0.0
+
+    - id: publish
+      name: Publish
+      action: witboostMeshComponent:publish:gitlab
+      input:
+        allowedHosts: ['gitlab.com']
+        description: 'This is ${{ parameters.name }}'
+        repoUrl: *destination
+        rootDirectory: '.'
+        dataproduct: '${{ parameters.dataproduct }}'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: '${{ steps.publish.output.repoContentsUrl }}'
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: '${{ steps.publish.output.remoteUrl }}'
+      - title: Open in catalog
+        icon: catalog
+        entityRef: '${{ steps.register.output.entityRef }}'

@@ -1,0 +1,8 @@
+site_name: "Output Port CDP Impala Template"
+site_description: "Template to create an instance of Output Port"
+
+nav:
+  - Template Usage: index.md
+
+plugins:
+  - techdocs-core
