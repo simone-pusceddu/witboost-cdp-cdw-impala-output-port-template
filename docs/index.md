@@ -85,21 +85,44 @@ This section includes information about the data sharing agreement field include
 
 This section includes information about the location and format of the deployed data used by the Output Port to access and expose it.
 
-- Database name: Impala Database name must be equal to $Domain_$DPName_$DPMajorVrs and must contain only the characters [a-zA-Z0-9_]. All other characters (like spaces or dashes) must be replaced with underscores (_)
-- Table name: Impala Table name must be equal to $Domain_$DPName_$DPMajorVrs_$ComponentName_$Environment and must contain only the characters [a-zA-Z0-9_]. All other characters (like spaces or dashes) must be replaced with underscores (_)
-- CDP Environment: Name of the CDP Environment
-- CDW virtual warehouse: Name of the CDW virtual warehouse
-- format: File format. The only values currently supported are csv and parquet files.
+- Database name: Must contain only the characters [a-zA-Z0-9_]. All other characters (like spaces or dashes) will be replaced with underscores (_). Please check the domain governance for the appropriate enforced naming convention. If left empty, an automatic value will be generated as $Domain_$DPName_$DPMajorVrs.
+- Table name: Must contain only the characters [a-zA-Z0-9_]. All other characters (like spaces or dashes) must be replaced with underscores (_). Please check the domain governance for the appropriate enforced naming convention. If left empty, an automatic value will be generated as $Domain_$DPName_$DPMajorVrs_$ComponentName.
 - Table location: S3A path pointing to the table files location. It must start with s3a://
+- Partitions: Set of column names to be used as partitions. These column names are taken from the Data Contract Schema previously defined on the form.
+- format: File format. Accepted values are CSV, Parquet, TEXTFILE and Avro files. 
+  - header: Whether CSV or TEXTFILE data files include a header as the first row
+  - delimiter: For TEXTFILE, custom delimiter among a set of predefined values or "Other". If "Other" is chosen, the option to insert a custom delimiter is given. This delimiter should be written as the corresponding hex number (0x##) of the character on the ASCII table **and wrapped in double quotes**, done this way in order to allow to use also non-printable characters as delimiters.
+- Table properties: List of string key-value pairs to add to the table creation statement as addition Impala TBLPROPERTIES, also overriding any default properties added by the provisioner.
+- CDP Environment: Name of the CDP Environment
+- CDW Virtual Warehouse: Name of the CDW virtual warehouse
+
+**Parquet example**:
 
 | Field name                | Example value                                     |
 |:--------------------------|:--------------------------------------------------|
 | **Database name**         | finance_cashflow_0                                |
 | **Table name**            | finance_cashflow_0_impala_output_port_development |
+| **Table location**        | s3a://some/path                                   |
+| **Partitions**            | [ country ]                                       |            
+| *Format**                 | PARQUET                                           |
 | **CDP Environment**       | example                                           |
 | **CDW virtual warehouse** | example                                           |
-| **format**                | PARQUET                                           |
+
+**Textfile example**:
+
+| Field name                | Example value                                     |
+|:--------------------------|:--------------------------------------------------|
+| **Database name**         | finance_cashflow_0                                |
+| **Table name**            | finance_cashflow_0_impala_output_port_development |
 | **Table location**        | s3a://some/path                                   |
+| **Partitions**            | [ country ]                                       |            
+| **Format**                | TEXTFILE                                          |
+| **Delimiter**             | "0x3B" (Hex value for ASCII character ';')        |
+| **Header**                | true                                              |
+| **Table properties**      | [{key1: value}, {key2: value2}]                   |                       
+| **CDP Environment**       | example                                           |
+| **CDW virtual warehouse** | example                                           |
+
 
 ## After creation
 

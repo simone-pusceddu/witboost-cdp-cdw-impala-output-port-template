@@ -7,7 +7,7 @@ infrastructureTemplateId: string
 useCaseTemplateId: string
 dependsOn: [...string]
 platform: "CDP on AWS"
-technology: "S3"
+technology: "Impala"
 outputPortType: "SQL"
 tags: [...string]
 readsFrom: [...string]
@@ -16,7 +16,14 @@ specific: {
 	tableName: string
   cdpEnvironment: string
   cdwVirtualWarehouse: string
-  format: "CSV" | "PARQUET"
+  format: "CSV" | "PARQUET" | "TEXTFILE" | "AVRO"
   location: string & =~ "^s3a://"
 	partitions: [...string]
+	tableParams?: {
+		delimiter?: null | string
+		header?: null | bool
+		tblProperties: {
+			[string]: string
+		}
+	}
 }

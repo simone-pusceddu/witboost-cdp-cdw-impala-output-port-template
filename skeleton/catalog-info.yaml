@@ -32,7 +32,7 @@ spec:
     dependsOn: {% if values.dependsOn | length > 0 %}{% for i in values.dependsOn %}
       - ${{ i }}{% endfor %}{% else %}[]{% endif %}
     platform: CDP on AWS
-    technology: S3
+    technology: Impala
     outputPortType: SQL
     creationDate: ${{ values.creationDate }}
     startDate: ${{ values.creationDate }}
@@ -69,11 +69,25 @@ spec:
     sampleData: {}
     semanticLinking: []
     specific:
-      databaseName: ${{ values.databaseName }}
-      tableName: ${{ values.tableName }}
+      databaseName: ${{ values.databaseName | default(values.dataproduct, true) | replace(r/system:/, "") | replace(r/[^A-Za-z0-9_]/g, "_") | upper }}
+      tableName: ${{ values.tableName | default(values.identifier, true) | replace(r/[^A-Za-z0-9_]/g, "_") | upper }}
       cdpEnvironment: ${{ values.cdpEnvironment }}
       cdwVirtualWarehouse: ${{ values.cdwVirtualWarehouse }}
       format: ${{ values.format }}
       location: ${{ values.location }}
-      partitions: []
+      partitions: {% if values.partitions | length > 0 %}{% for partition in values.partitions %}
+        - ${{ partition.value.name }}{% endfor %}{% else %}[]{% endif %}
+      {% if values.header or values.delimiter or ( values.tableProperties | length > 0 ) %}
+      tableParams:
+        {% if values.header and (values.format === "CSV" or values.format == "TEXTFILE") %}
+        header: ${{ values.header }} 
+        {% endif %}
+        {% if values.delimiter and (values.format === "CSV" or values.format == "TEXTFILE") %} 
+        delimiter: "${{ values.delimiter if values.delimiter != "OTHER" else values.customDelimiter }}"
+        {% endif %}
+        tblProperties: {% if values.tableProperties | length > 0 %}
+        {% for property in values.tableProperties %}
+          ${{ property.key | dump }}: ${{ property.value | dump }}
+        {% endfor %}{% else %}{}{% endif %}
+      {% endif %}
       

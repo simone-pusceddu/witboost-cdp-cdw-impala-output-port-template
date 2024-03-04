@@ -119,118 +119,121 @@ spec:
     - title: Data contract schema
       description: Primitive data types supported. For complex data types (MAP, STRUCT, etc.) please modify manually the component catalog-info.yaml once is generated.
       properties:
-        schemaColumns:
-          title: Schema Columns
-          type: array
-          ui:ArrayFieldTemplate: ArrayTableTemplate
-          items:
-            type: object
-            ui:ObjectFieldTemplate: TableRowTemplate
-            required: [ name, dataType ]
-            properties:
-              name:
-                type: string
-                title: Column Name
-              description:
-                type: string
-                title: Description
-              dataType:
-                type: string
-                default: INT
-                title: Column Data Type
-                enum:
-                  - TINYINT
-                  - SMALLINT
-                  - INT
-                  - BIGINT
-                  - DOUBLE
-                  - DECIMAL
-                  - TIMESTAMP
-                  - DATE
-                  - STRING
-                  - CHAR
-                  - VARCHAR
-                  - BOOLEAN
-                  - ARRAY
-            allOf:
-              - if:
-                  properties:
-                    dataType:
-                      oneOf:
-                        - const: VARCHAR
-                        - const: CHAR
-                then:
-                  properties:
-                    dataLength:
-                      title: Column Length
-                      type: integer
-                      description: Maximum length of column row
-                  required:
-                    - dataLength
-              - if:
-                  properties:
-                    dataType:
-                      oneOf:
-                        - const: DECIMAL
-                then:
-                  properties:
-                    dataTypeDisplay:
-                      title: Data Type Display
-                      type: string
-                      description: Representation of data type (e.g. `decimal(9,0)` )
-              - if:
-                  properties:
-                    dataType:
-                      const: ARRAY
-                then:
-                  required:
-                    - arrayDataType
-                  properties:
-                    arrayDataType:
-                      title: Array Data Type
-                      description: Data type of the array elements
-                      type: string
-                      default: INT
-                      enum:
-                        - TINYINT
-                        - SMALLINT
-                        - INT
-                        - BIGINT
-                        - DOUBLE
-                        - DECIMAL
-                        - TIMESTAMP
-                        - DATE
-                        - STRING
-                        - CHAR
-                        - VARCHAR
-                        - BOOLEAN
-                        - ARRAY
-                  allOf:
-                    - if:
-                        properties:
-                          arrayDataType:
-                            oneOf:
-                              - const: VARCHAR
-                              - const: CHAR
-                      then:
-                        properties:
-                          dataLength:
-                            title: Column Length
-                            type: integer
-                            description: Maximum length of column row
-                        required:
-                          - dataLength
-                    - if:
-                        properties:
-                          arrayDataType:
-                            oneOf:
-                              - const: DECIMAL
-                      then:
-                        properties:
-                          dataTypeDisplay:
-                            title: Data Type Display
-                            type: string
-                            description: Representation of data type (e.g. `decimal(9,0)` )
+        schemaWrapper:
+          title: ''
+          type: object
+          properties:
+            schemaColumns:
+              title: Schema Columns
+              type: array
+              ui:ArrayFieldTemplate: ArrayTableTemplate
+              items:
+                type: object
+                ui:ObjectFieldTemplate: TableRowTemplate
+                required: [ name, dataType ]
+                properties:
+                  name:
+                    type: string
+                    title: Column Name
+                  description:
+                    type: string
+                    title: Description
+                  dataType:
+                    type: string
+                    default: INT
+                    title: Column Data Type
+                    enum:
+                      - TINYINT
+                      - SMALLINT
+                      - INT
+                      - BIGINT
+                      - DOUBLE
+                      - DECIMAL
+                      - TIMESTAMP
+                      - DATE
+                      - STRING
+                      - CHAR
+                      - VARCHAR
+                      - BOOLEAN
+                      - ARRAY
+                allOf:
+                  - if:
+                      properties:
+                        dataType:
+                          oneOf:
+                            - const: VARCHAR
+                            - const: CHAR
+                    then:
+                      properties:
+                        dataLength:
+                          title: Column Length
+                          type: integer
+                          description: Maximum length of column row
+                      required:
+                        - dataLength
+                  - if:
+                      properties:
+                        dataType:
+                          oneOf:
+                            - const: DECIMAL
+                    then:
+                      properties:
+                        dataTypeDisplay:
+                          title: Data Type Display
+                          type: string
+                          description: Representation of data type (e.g. `decimal(9,0)` )
+                  - if:
+                      properties:
+                        dataType:
+                          const: ARRAY
+                    then:
+                      required:
+                        - arrayDataType
+                      properties:
+                        arrayDataType:
+                          title: Array Data Type
+                          description: Data type of the array elements
+                          type: string
+                          enum:
+                            - TINYINT
+                            - SMALLINT
+                            - INT
+                            - BIGINT
+                            - DOUBLE
+                            - DECIMAL
+                            - TIMESTAMP
+                            - DATE
+                            - STRING
+                            - CHAR
+                            - VARCHAR
+                            - BOOLEAN
+                            - ARRAY
+                      allOf:
+                        - if:
+                            properties:
+                              arrayDataType:
+                                oneOf:
+                                  - const: VARCHAR
+                                  - const: CHAR
+                          then:
+                            properties:
+                              dataLength:
+                                title: Column Length
+                                type: integer
+                                description: Maximum length of column row
+                            required:
+                              - dataLength
+                        - if:
+                            properties:
+                              arrayDataType:
+                                oneOf:
+                                  - const: DECIMAL
+                          then:
+                            properties:
+                              dataTypeDisplay:
+                                title: Data Type Display
+                                type: string
+                                description: Representation of data type (e.g. `decimal(9,0)` )
 
     - title: Data sharing agreements information
       properties:
@@ -265,40 +268,22 @@ spec:
             
     - title: Provide Output port deployment information
       required:
-        - databaseName
-        - tableName
-        - cdpEnvironment
-        - cdwVirtualWarehouse
-        - format
         - location
       properties:
         databaseName:
           title: Database name
           type: string
-          description: >
-            Impala Database name must be equal to $Domain_$DPName_$DPMajorVrs and must contains only the characters [a-zA-Z0-9_].
-            All other characters (like spaces or dashes) must be replaced with underscores (_)
+          description: If left empty, an automatic value will be generated as $Domain_$DPName_$DPMajorVrs.
+          ui:help: >
+            Must contain only the characters [a-zA-Z0-9_]. All other characters (like spaces or dashes) will be replaced with underscores (_). 
+            Please check the domain governance for the appropriate enforced naming convention. 
         tableName:
           title: Table name
           type: string
-          description: >
-            Impala Table name must be equal to $Domain_$DPName_$DPMajorVrs_$ComponentName_$Environment and must contains only the characters [a-zA-Z0-9_].
-            All other characters (like spaces or dashes) must be replaced with underscores (_)
-        cdpEnvironment:
-          title: CDP Environment
-          type: string
-          description: Name of the CDP Environment
-        cdwVirtualWarehouse:
-          title: CDW virtual warehouse
-          type: string
-          description: Name of the CDW virtual warehouse
-        format:
-          title: Format
-          type: string
-          description: File format
-          enum:
-            - PARQUET
-            - CSV
+          description: If left empty, an automatic value will be generated as $Domain_$DPName_$DPMajorVrs_$ComponentName.
+          ui:help: >
+            Must contain only the characters [a-zA-Z0-9_]. All other characters (like spaces or dashes) must be replaced with underscores (_).         
+            Please check the domain governance for the appropriate enforced naming convention. 
         location:
           title: Table location
           type: string
@@ -307,6 +292,133 @@ spec:
             errorMessage: s3a location must start with s3a://
             regularExpression: ^s3a://
           ui:field: RegexPicker
+        partitions:
+          title: Table Partitions
+          description: Choose the column partitions (if any) from the provided data contract schema. (Available only in Witboost 1.4.0+)
+          type: array
+          items:
+            ui:ObjectFieldTemplate: TableRowTemplate
+            type: object # don't change it
+            ui:field: DescriptorPicker
+            sourceType: field
+            source: schemaWrapper
+            optionsAt: schemaColumns
+            optionsDisplayNameAt:
+              name
+        formatProperties:
+          title: Format Properties
+          type: object
+          ui:ObjectFieldTemplate: HorizontalTemplate
+          ui:options:
+            elementsPerRow: 2
+          required:
+            - format
+          properties:
+            format:
+              title: Format
+              type: string
+              default: PARQUET
+              description: File format
+              enum:
+                - PARQUET
+                - CSV
+                - TEXTFILE
+                - AVRO
+          allOf:
+            - if:
+                required:
+                  - format
+                properties:
+                  format:
+                    const: CSV
+              then:
+                properties:
+                  header:
+                    title: Data files have header?
+                    type: boolean
+            - if:
+                required:
+                  - format
+                properties:
+                  format:
+                    const: TEXTFILE
+              then:
+                required:
+                  - delimiter
+                properties:
+                  header:
+                    title: Data files have header?
+                    type: boolean
+                  delimiter:
+                    title: Field delimiter
+                    type: string
+                    enum:
+                      - "0x01"
+                      - "0x2c"
+                      - "0x09"
+                      - "0x7C"
+                      - "0x3B"
+                      - OTHER
+                    enumNames:
+                      - Hadoop Default Delimiter (Ctrl-A)
+                      - Comma (,)
+                      - Tab (\t)
+                      - Pipe (|)
+                      - Semicolon (;)
+                      - Other
+                allOf:
+                  - if:
+                      required:
+                        - delimiter
+                      properties:
+                        delimiter:
+                          const: "OTHER"
+                    then:
+                      required:
+                        - customDelimiter
+                      properties:
+                        customDelimiter:
+                          title: Custom Delimiter
+                          type: string
+                          description: "Type the ASCII Hex value of the delimiter in the format 0x##"
+                          ui:field: RegexPicker
+                          validation:
+                            errorMessage: Value is not a hex number
+                            regularExpression: ^0x[0-9a-fA-F][0-9a-fA-F]$
+        tableProperties:
+          title: Extra Table Properties (Impala TBLPROPERTIES)
+          description: Impala TBLPROPERTIES to be added when creating the External Table
+          type: array
+          ui:ArrayFieldTemplate: ArrayTableTemplate
+          default: []
+          items:
+            type: object
+            ui:ObjectFieldTemplate: TableRowTemplate
+            required:
+              - key
+              - value
+            properties:
+              key:
+                type: string
+                title: Key
+              value:
+                type: string
+                title: Value
+        cdpParams:
+          type: object
+          title: CDP Public Environment parameters
+          required:
+            - cdpEnvironment
+            - cdwVirtualWarehouse
+          properties:
+            cdpEnvironment:
+              title: CDP Environment
+              type: string
+              description: Name of the CDP Environment
+            cdwVirtualWarehouse:
+              title: CDW virtual warehouse
+              type: string
+              description: Name of the CDW virtual warehouse
 
   steps:
     - id: template
@@ -330,7 +442,7 @@ spec:
           upTime: '${{ parameters.upTime }}'
           termsAndConditions: '${{ parameters.termsAndConditions }}'
           endpoint: '${{ parameters.endpoint }}'
-          schemaColumns: '${{ parameters.schemaColumns }}'
+          schemaColumns: '${{ parameters.schemaWrapper.schemaColumns }}'
           purpose: '${{ parameters.purpose }}'
           billing: '${{ parameters.billing }}'
           security: '${{ parameters.security }}'
@@ -340,10 +452,16 @@ spec:
           confidentiality: '${{ parameters.confidentiality }}'
           databaseName: '${{ parameters.databaseName }}'
           tableName: '${{ parameters.tableName }}'
-          cdpEnvironment: '${{ parameters.cdpEnvironment }}'
-          cdwVirtualWarehouse: '${{ parameters.cdwVirtualWarehouse }}'
-          format: '${{ parameters.format }}'
+          viewName: '${{ parameters.viewName }}'
+          format: '${{ parameters.formatProperties.format }}'
+          header: '${{ parameters.formatProperties.header }}'
+          delimiter: '${{ parameters.formatProperties.delimiter }}'
+          customDelimiter: '${{ parameters.formatProperties.customDelimiter }}'
+          tableProperties: '${{ parameters.tableProperties }}'
           location: '${{ parameters.location }}'
+          partitions: '${{ parameters.partitions }}'
+          cdpEnvironment: '${{ parameters.cdpParams.cdpEnvironment }}'
+          cdwVirtualWarehouse: '${{ parameters.cdpParams.cdwVirtualWarehouse }}'
           creationDate: '${{ parameters.creationDate }}'
           useCaseTemplateId: urn:dmb:utm:aws-cdp-outputport-impala-template:0.0.0
           infrastructureTemplateId: urn:dmb:itm:aws-cdp-outputport-impala-provisioner:1
