@@ -12,6 +12,7 @@ metadata:
     - impala
     - output-port
 spec:
+  generates: componenttype:default/outputport
   owner: datameshplatform
   type: outputport
   parameters:
