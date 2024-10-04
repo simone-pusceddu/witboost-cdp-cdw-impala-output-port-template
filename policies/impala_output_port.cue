@@ -1,25 +1,25 @@
-name:                     string
-fullyQualifiedName?:      null | string
-description:              string
-kind:                     "outputport"
-version:                  string & =~"^[0-9]+\\.[0-9]+\\..+$"
-infrastructureTemplateId: string
-useCaseTemplateId:        string
+name!:                     string
+fullyQualifiedName?:       null | string
+description!:              string
+kind!:                     "outputport"
+version!:                  string & =~"^[0-9]+\\.[0-9]+\\..+$"
+infrastructureTemplateId!: string
+useCaseTemplateId!:        string
 dependsOn: [...string]
-platform:             "CDP on AWS"
-technology:           "Impala"
-outputPortType:       "SQL"
+platform!:            "CDP on AWS"
+technology!:          "Impala"
+outputPortType!:      "SQL"
 dataContract:         #DataContract
 dataSharingAgreement: #DataSharingAgreement
 tags: [...#OM_Tag]
 readsFrom: [...string]
 specific: {
-	databaseName:        string
-	tableName:           string
-	cdpEnvironment:      string
-	cdwVirtualWarehouse: string
-	format:              "CSV" | "PARQUET" | "TEXTFILE" | "AVRO"
-	location:            string & =~"^s3a://"
+	databaseName!:        string
+	tableName!:           string
+	cdpEnvironment!:      string
+	cdwVirtualWarehouse!: string
+	format!:              "CSV" | "PARQUET" | "TEXTFILE" | "AVRO"
+	location!:            string & =~"^s3a://"
 	partitions: [...string]
 	tableParams?: {
 		delimiter?: null | string
@@ -30,33 +30,38 @@ specific: {
 	}
 }
 
-#OM_DataType: string & =~"(?i)^(TINYINT|SMALLINT|INT|BIGINT|DOUBLE|DECIMAL|TIMESTAMP|DATE|STRING|CHAR|VARCHAR|BOOLEAN|ARRAY|MAP|STRUCT|UNION)$"
-#URL:         string & =~"^https?://[a-zA-Z0-9@:%._~#=&/?]*$"
+// Subset of OM DataTypes
+#Impala_DataType: string & =~"(?i)^(TINYINT|SMALLINT|INT|BIGINT|DOUBLE|DECIMAL|NUMERIC|TIMESTAMP|DATE|STRING|CHAR|VARCHAR|BOOLEAN|ARRAY|MAP|STRUCT|UNION)$"
+#URL:             string & =~"^https?://[a-zA-Z0-9@:%._~#=&/?]*$"
 #OM_Tag: {
-	tagFQN:       string
+	tagFQN!:      string
 	description?: string | null
-	source:       string & =~"(?i)^(Tag|Glossary)$"
-	labelType:    string & =~"(?i)^(Manual|Propagated|Automated|Derived)$"
-	state:        string & =~"(?i)^(Suggested|Confirmed)$"
+	source!:      string & =~"(?i)^(Tag|Glossary)$"
+	labelType!:   string & =~"(?i)^(Manual|Propagated|Automated|Derived)$"
+	state!:       string & =~"(?i)^(Suggested|Confirmed)$"
 	href?:        string | null
+	...
 }
 
 #OM_Column: {
-	name:     string
-	dataType: #OM_DataType
+	name!:     string
+	dataType!: #Impala_DataType
 	if dataType =~ "(?i)^(ARRAY)$" {
-		arrayDataType: #OM_DataType
+		arrayDataType!: #Impala_DataType
 	}
 	if dataType =~ "(?i)^(CHAR|VARCHAR|BINARY|VARBINARY)$" {
-		dataLength: number
+		dataLength!: number
 	}
-	dataTypeDisplay?:    string | null
+	if dataType =~ "(?i)^(DECIMAL|NUMERIC)" {
+		dataTypeDisplay!: string
+	}
 	description?:        string | null
 	fullyQualifiedName?: string | null
 	tags?: [... #OM_Tag]
 	if dataType =~ "(?i)^(MAP|STRUCT|UNION)$" {
 		children: [... #OM_Column]
 	}
+	...
 }
 
 #DataContract: {

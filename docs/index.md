@@ -126,4 +126,4 @@ This section includes information about the location and format of the deployed 
 
 ## After creation
 
-In order to customize the component information, access the component repository and update the `spec.mesh` section inside the `catalog-info.yaml` according to the [Data Product specification](https://github.com/agile-lab-dev/Data-Product-Specification) and to the Impala specific provisioner expected yaml schema.
+In order to customize the component information, access the component repository and update the `spec.mesh` section inside the `catalog-info.yaml` according to the [Data Product specification](https://github.com/agile-lab-dev/Data-Product-Specification) and to the Impala Tech Adapter expected yaml schema.
