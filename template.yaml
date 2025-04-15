@@ -1,8 +1,8 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: cdp-refresh-aws-outputport-impala-template.1
-  title: Output Port CDP-Refresh Impala Template
+  name: cdp-refresh-aws-outputport-impala-template-skeleton
+  title: Output Port CDP-Refresh Impala Template (Skeleton)
   description: Create a repository containing the definition of a CDP Impala Output Port
   mesh:
     icon: https://impala.apache.org/img/impala-logo.png
