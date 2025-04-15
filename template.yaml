@@ -466,7 +466,7 @@ spec:
           creationDate: '${{ parameters.creationDate }}'
           useCaseTemplateId: urn:dmb:utm:aws-cdp-outputport-impala-template:0.0.0
           infrastructureTemplateId: urn:dmb:itm:aws-cdp-outputport-impala-provisioner:1
-          destination: &destination 'gitlab.com?owner=AgileDmbSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
+          destination: &destination 'gitlab.com?owner=simone.pusceddu&repo=${{ parameters.name.split(" ") | join("") | lower }}'
           rootDirectory: '.'
           displayName: '${{ parameters.displayName }}'
           artifact_id: '${{ parameters.name }}'
